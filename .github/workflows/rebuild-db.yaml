@@ -52,6 +52,17 @@ jobs:
       #   run: |
       #     cf target -o cisa-dotgov -s nl
 
+       - name: Install cf-service-connect plugin
+        id: connect
+        run: |
+          cf install-plugin -r CF-Community "cf-service-connect"
+
+      # - name: Install plugin
+      #   id: connect
+      #   run: |
+      #     cf install-plugin https://github.com/cloud-gov/cf-service-connect/releases/download/v1.1.3/cf-service-connect_darwin_amd64
+
+
       - name: Connect to service
         id: connect
         run: |
