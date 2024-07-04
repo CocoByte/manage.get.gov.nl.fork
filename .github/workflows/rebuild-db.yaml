@@ -14,13 +14,12 @@ on:
   workflow_dispatch:
     inputs:
       environment:
-        type: choice
         description: Which environment should we flush and re-load data for?
-        options:
-          - rb
+        default: 'rb'
+        
 
 jobs:
-  reset-db:
+  rebuild-db:
     runs-on: ubuntu-latest
     env:
       CF_USERNAME: CF_${{ github.event.inputs.environment }}_USERNAME
