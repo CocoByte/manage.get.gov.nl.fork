@@ -63,22 +63,42 @@ jobs:
       #   run: |
       #     cf target -o cisa-dotgov -s nl
 
-      - name: Install cf-service-connect plugin
-        id: install
-        run: |
-          cf install-plugin -r CF-Community "cf-service-connect"
+      # - name: Install cf-service-connect plugin
+      #   id: install
+      #   run: |
+      #     cf install-plugin -r CF-Community "cf-service-connect"
 
       # - name: Install plugin
       #   id: connect
       #   run: |
       #     cf install-plugin https://github.com/cloud-gov/cf-service-connect/releases/download/v1.1.3/cf-service-connect_darwin_amd64
 
+      - name: Install cf-service-connect plugin
+        uses: cloud-gov/cg-cli-tools@main
+        with:
+          cf_username: ${{ secrets[env.CF_USERNAME] }}
+          cf_password: ${{ secrets[env.CF_PASSWORD] }}
+          cf_org: cisa-dotgov
+          cf_space: ${{ github.event.inputs.environment }}
+          cf_command: "install-plugin -r CF-Community "cf-service-connect""    
 
+
+
+      # - name: Connect to service
+      #   id: connect
+      #   run: |
+      #     cf connect-to-service -no-client getgov-${{ github.event.inputs.environment }} getgov-${{ github.event.inputs.environment }}-database > connection_info.txt
+      #     cat connection_info.txt
+     
       - name: Connect to service
-        id: connect
-        run: |
-          cf connect-to-service -no-client getgov-${{ github.event.inputs.environment }} getgov-${{ github.event.inputs.environment }}-database > connection_info.txt
-          cat connection_info.txt
+        uses: cloud-gov/cg-cli-tools@main
+        with:
+          cf_username: ${{ secrets[env.CF_USERNAME] }}
+          cf_password: ${{ secrets[env.CF_PASSWORD] }}
+          cf_org: cisa-dotgov
+          cf_space: ${{ github.event.inputs.environment }}
+          cf_command: "connect-to-service -no-client getgov-${{ github.event.inputs.environment }} getgov-${{ github.event.inputs.environment }}-database > connection_info.txt
+          cat connection_info.txt" 
 
       - name: Extract connection details
         id: extract
