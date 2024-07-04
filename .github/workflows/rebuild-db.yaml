@@ -82,8 +82,6 @@ jobs:
           cf_space: ${{ github.event.inputs.environment }}
           cf_command: "install-plugin -r CF-Community "cf-service-connect""    
 
-
-
       # - name: Connect to service
       #   id: connect
       #   run: |
