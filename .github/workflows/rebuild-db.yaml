@@ -4,33 +4,6 @@
 name: Rebuild database
 run-name: Rebuild database for ${{ github.event.inputs.environment }}
 
-# on:
-  # workflow_dispatch:
-  #   inputs:
-  #     environment:
-  #       type: choice
-  #       description: Which environment should we flush and re-load data for?
-  #       options:
-  #         - development
-  #         - ag
-  #         - litterbox
-  #         - hotgov
-  #         - cb
-  #         - bob
-  #         - meoward
-  #         - backup
-  #         - ky
-  #         - es
-  #         - nl
-  #         - rh
-  #         - za
-  #         - gd
-  #         - rb
-  #         - ko
-  #         - ab
-  #         - rjm
-  #         - dk
-
 on:
   push:
     branches:
@@ -43,35 +16,20 @@ on:
         default: 'rb' # or 'staging', 'prod', etc.
 
 jobs:
-  connect-to-service:
+  reset-db:
     runs-on: ubuntu-latest
     env:
       CF_USERNAME: CF_${{ github.event.inputs.environment }}_USERNAME
       CF_PASSWORD: CF_${{ github.event.inputs.environment }}_PASSWORD
-
     steps:
-      # - name: Delete existing data for ${{ github.event.inputs.environment }}
-      #   uses: cloud-gov/cg-cli-tools@main
-      #   with:
-      #     cf_username: ${{ secrets[env.CF_USERNAME] }}
-      #     cf_password: ${{ secrets[env.CF_PASSWORD] }}
-      #     cf_org: cisa-dotgov
-      #     cf_space: ${{ github.event.inputs.environment }}
-      #     cf_command: "run-task getgov-${{ github.event.inputs.environment }} --command 'python manage.py flush --no-input' --name flush"
-
-      # - name: Target organization and space
-      #   run: |
-      #     cf target -o cisa-dotgov -s nl
-
-      # - name: Install cf-service-connect plugin
-      #   id: install
-      #   run: |
-      #     cf install-plugin -r CF-Community "cf-service-connect"
-
-      # - name: Install plugin
-      #   id: connect
-      #   run: |
-      #     cf install-plugin https://github.com/cloud-gov/cf-service-connect/releases/download/v1.1.3/cf-service-connect_darwin_amd64
+      - name: test step
+        uses: cloud-gov/cg-cli-tools@main
+        with:
+          cf_username: ${{ secrets[env.CF_USERNAME] }}
+          cf_password: ${{ secrets[env.CF_PASSWORD] }}
+          cf_org: cisa-dotgov
+          cf_space: ${{ github.event.inputs.environment }}
+          cf_command: ""
 
       - name: Install cf-service-connect plugin
         uses: cloud-gov/cg-cli-tools@main
