@@ -11,10 +11,10 @@ on:
   workflow_dispatch:
     inputs:
       environment:
-        description: 'Environment'
-        required: true
-        default: rb # or 'staging', 'prod', etc.
-
+        type: choice
+        description: Which environment should we flush and re-load data for?
+        options:
+          - rb
 jobs:
   reset-db:
     runs-on: ubuntu-latest
