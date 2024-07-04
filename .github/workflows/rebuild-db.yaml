@@ -64,7 +64,7 @@ jobs:
       #     cf target -o cisa-dotgov -s nl
 
       - name: Install cf-service-connect plugin
-        id: connect
+        id: install
         run: |
           cf install-plugin -r CF-Community "cf-service-connect"
 
