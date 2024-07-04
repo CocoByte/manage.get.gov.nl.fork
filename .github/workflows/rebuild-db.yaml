@@ -4,32 +4,43 @@
 name: Rebuild database
 run-name: Rebuild database for ${{ github.event.inputs.environment }}
 
+# on:
+  # workflow_dispatch:
+  #   inputs:
+  #     environment:
+  #       type: choice
+  #       description: Which environment should we flush and re-load data for?
+  #       options:
+  #         - development
+  #         - ag
+  #         - litterbox
+  #         - hotgov
+  #         - cb
+  #         - bob
+  #         - meoward
+  #         - backup
+  #         - ky
+  #         - es
+  #         - nl
+  #         - rh
+  #         - za
+  #         - gd
+  #         - rb
+  #         - ko
+  #         - ab
+  #         - rjm
+  #         - dk
+
 on:
+  push:
+    branches:
+      - main # Replace with your specific branch name
   workflow_dispatch:
     inputs:
       environment:
-        type: choice
-        description: Which environment should we flush and re-load data for?
-        options:
-          - development
-          - ag
-          - litterbox
-          - hotgov
-          - cb
-          - bob
-          - meoward
-          - backup
-          - ky
-          - es
-          - nl
-          - rh
-          - za
-          - gd
-          - rb
-          - ko
-          - ab
-          - rjm
-          - dk
+        description: 'Environment'
+        required: true
+        default: 'rb' # or 'staging', 'prod', etc.
 
 jobs:
   connect-to-service:
