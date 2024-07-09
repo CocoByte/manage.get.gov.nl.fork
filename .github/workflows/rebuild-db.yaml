@@ -30,6 +30,10 @@ jobs:
       CF_USERNAME: CF_${{ github.event.inputs.environment }}_USERNAME
       CF_PASSWORD: CF_${{ github.event.inputs.environment }}_PASSWORD
     steps:
+      - name: Use Secret in Action
+        run: echo "The secret CF_USERNAME is ${{ secrets.CF_USERNAME }}"
+        run: echo "The secret CF_USERNAME is ${{ secrets.CF_USERNAME }}"
+
       - name: TEST STEP
         uses: cloud-gov/cg-cli-tools@main
         with:
