@@ -40,7 +40,7 @@ jobs:
      
       - name: Install cf-service-connect plugin
         run: |
-          echo "y" | install-plugin https://github.com/cloud-gov/cf-service-connect/releases/download/v1.1.3/cf-service-connect_darwin_amd64
+          echo "y" | cf install-plugin https://github.com/cloud-gov/cf-service-connect/releases/download/v1.1.3/cf-service-connect_darwin_amd64
       
       # # - name: Connect to service
       # #   id: connect
