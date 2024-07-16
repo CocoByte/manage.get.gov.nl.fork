@@ -14,14 +14,24 @@ run-name: Rebuild database for ${{ github.event.inputs.environment }}
 #           - nl
 #           - rb
 
+# on:
+#   push:
+#     branches:
+#       - main # Replace with your specific branch name
+#   workflow_dispatch:
+#     inputs:
+#       environment:
+#         default: 'nl'
+
+
 on:
-  push:
-    branches:
-      - main # Replace with your specific branch name
   workflow_dispatch:
     inputs:
       environment:
-        default: 'nl'
+        type: choice
+        description: Which environment should we flush and re-load data for?
+        options:
+          - nl
 
 jobs:
   reset-db:
