@@ -21,7 +21,7 @@ on:
   workflow_dispatch:
     inputs:
       environment:
-        default: 'rb'
+        default: 'nl'
 
 jobs:
   rebuild-db:
