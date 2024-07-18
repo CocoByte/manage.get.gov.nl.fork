@@ -20,7 +20,6 @@ jobs:
       CF_USERNAME: CF_${{ github.event.inputs.environment }}_USERNAME
       CF_PASSWORD: CF_${{ github.event.inputs.environment }}_PASSWORD
     steps:
-      - uses: cloud-gov/cg-cli-tools@main
    
       # - name: Install cf-service-connect plugin
       #   uses: cloud-gov/cg-cli-tools@main
@@ -31,12 +30,19 @@ jobs:
       #     cf_space: ${{ github.event.inputs.environment }}
       #     cf_command: "echo 'y' | pip install-plugin https://github.com/cloud-gov/cf-service-connect/releases/download/v1.1.3/cf-service-connect_darwin_amd64" 
       
+      - uses: actions/checkout@v3
+
+      - name: Install cf-service-connect plugin
+        uses: cloud-gov/cg-cli-tools@main
+        working-directory: ./src
+        run: echo 'y' | cf install-plugin https://github.com/cloud-gov/cf-service-connect/releases/download/v1.1.3/cf-service-connect_darwin_amd64
 
       
       # # - name: Connect to service
       # #   id: connect
       # #   run: |
       # #     cf connect-to-service -no-client getgov-${{ github.event.inputs.environment }} getgov-${{ github.event.inputs.environment }}-database > connection_info.txt
+      
       # - name: Connect to service
       #   with:
       #     cf_username: ${{ secrets[env.CF_USERNAME] }}
@@ -81,6 +87,7 @@ jobs:
       # #   run: |
       # #     cf ssh getgov-${{ github.event.inputs.environment }} -c "/tmp/lifecycle/shell ./manage.py migrate"
       - name: Run Django migrations for ${{ github.event.inputs.environment }}
+        uses: cloud-gov/cg-cli-tools@main
         with:
           cf_username: ${{ secrets[env.CF_USERNAME] }}
           cf_password: ${{ secrets[env.CF_PASSWORD] }}
