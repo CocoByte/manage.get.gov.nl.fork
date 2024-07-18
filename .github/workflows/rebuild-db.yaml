@@ -20,6 +20,7 @@ jobs:
       CF_USERNAME: CF_${{ github.event.inputs.environment }}_USERNAME
       CF_PASSWORD: CF_${{ github.event.inputs.environment }}_PASSWORD
     steps:
+      - uses: actions/checkout@v3
       - uses: cloud-gov/cg-cli-tools@main
 
       - name: Uses cf-service-connect plugin
