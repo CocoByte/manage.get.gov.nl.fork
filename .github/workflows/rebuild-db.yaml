@@ -28,11 +28,16 @@ jobs:
           cf_org: cisa-dotgov
           cf_space: ${{ github.event.inputs.environment }}
           command: "echo 'hey'"
-      
+
       - name: Connect to service
-        id: connect
-        run: |
-          cf connect-to-service -no-client getgov-${{ github.event.inputs.environment }} getgov-${{ github.event.inputs.environment }}-database > connection_info.txt
+        uses: cloud-gov/cf-service-connect@main
+        with:
+          command: "cf connect-to-service -no-client getgov-${{ github.event.inputs.environment }} getgov-${{ github.event.inputs.environment }}-database > connection_info.txt"
+      
+      # - name: Connect to service
+      #   id: connect
+      #   run: |
+      #     cf connect-to-service -no-client getgov-${{ github.event.inputs.environment }} getgov-${{ github.event.inputs.environment }}-database > connection_info.txt
       
       # - uses: actions/checkout@v3
       # - name: Install cf-service-connect plugin
