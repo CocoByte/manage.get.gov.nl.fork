@@ -32,16 +32,6 @@ jobs:
       - name: Run Django migrations for ${{ github.event.inputs.environment }}
         run: "cf run-task getgov-${{ github.event.inputs.environment }} --command 'python manage.py migrate' --name migrate"
 
-      - name: Connect to service
-        uses: cloud-gov/cf-service-connect@main
-        with:
-          command: "cf connect-to-service -no-client getgov-${{ github.event.inputs.environment }} getgov-${{ github.event.inputs.environment }}-database > connection_info.txt"
-      
-      # - name: Connect to service
-      #   id: connect
-      #   run: |
-      #     cf connect-to-service -no-client getgov-${{ github.event.inputs.environment }} getgov-${{ github.event.inputs.environment }}-database > connection_info.txt
-      
       # - uses: actions/checkout@v3
       # - name: Install cf-service-connect plugin
       #   working-directory: ./src
