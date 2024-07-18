@@ -41,8 +41,8 @@ jobs:
           sudo dpkg -i cf-cli.deb 
       - name: Install cf-service-connect plugin
           run: | 
-              cf login -u ${{ secrets[env.CF_USERNAME] }} -p ${{ secrets[env.CF_PASSWORD] }} -o cisa-dotgov -s ${{ github.event.inputs.environment }} 
-              cf install-plugin https://github.com/cloud-gov/cf-service-connect/releases/download/v1.1.4/cf-service-connect_linux_amd64 -f
+            cf login -u ${{ secrets[env.CF_USERNAME] }} -p ${{ secrets[env.CF_PASSWORD] }} -o cisa-dotgov -s ${{ github.event.inputs.environment }} 
+            cf install-plugin https://github.com/cloud-gov/cf-service-connect/releases/download/v1.1.4/cf-service-connect_linux_amd64 -f
 
       - name: Install cf-service-connect plugin
         uses: cloud-gov/cg-cli-tools@main
