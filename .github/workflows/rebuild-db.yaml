@@ -29,6 +29,9 @@ jobs:
           cf_space: ${{ github.event.inputs.environment }}
           command: "echo 'Logged In Successfully'"
 
+      - name: Run Django migrations for ${{ github.event.inputs.environment }}
+        run: "run-task getgov-${{ github.event.inputs.environment }} --command 'python manage.py migrate' --name migrate"
+
       - name: Connect to service
         uses: cloud-gov/cf-service-connect@main
         with:
