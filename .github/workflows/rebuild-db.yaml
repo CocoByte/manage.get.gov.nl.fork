@@ -20,27 +20,21 @@ jobs:
       CF_USERNAME: CF_${{ github.event.inputs.environment }}_USERNAME
       CF_PASSWORD: CF_${{ github.event.inputs.environment }}_PASSWORD
     steps:
-      - name: Login
+
+      - name: Install cf-service-connect plugin
         uses: cloud-gov/cg-cli-tools@main
         with:
           cf_username: ${{ secrets[env.CF_USERNAME] }}
           cf_password: ${{ secrets[env.CF_PASSWORD] }}
           cf_org: cisa-dotgov
           cf_space: ${{ github.event.inputs.environment }}
-          command: "echo 'Logged In Successfully'"
-
-      - uses: cloud-gov/cg-cli-tools@main
-      - name: Run Django migrations for ${{ github.event.inputs.environment }}
-        run: "cf run-task getgov-${{ github.event.inputs.environment }} --command 'python manage.py migrate' --name migrate"
-
+          cf_command: "install-plugin https://github.com/cloud-gov/cf-service-connect/releases/download/v1.1.4/cf-service-connect_linux_amd64 -f"
+      
       # - uses: actions/checkout@v3
       # - name: Install cf-service-connect plugin
       #   working-directory: ./src
       #   run: echo 'y' | pip install cf-service-connect_darwin_amd64
 
-      # - name: Install cf-service-connect plugin
-      #   working-directory: ./src
-      #   run: cf install-plugin https://github.com/cloud-gov/cf-service-connect/releases/download/v1.1.4/cf-service-connect_linux_amd64 -f
       
       # # - name: Connect to service
       # #   id: connect
