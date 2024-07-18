@@ -28,7 +28,7 @@ jobs:
           cf_password: ${{ secrets[env.CF_PASSWORD] }}
           cf_org: cisa-dotgov
           cf_space: ${{ github.event.inputs.environment }}
-          command: "echo 'y' | install-plugin https://github.com/cloud-gov/cf-service-connect/releases/download/v1.1.3/cf-service-connect_darwin_amd64" 
+          cf_command: "echo 'y' | install-plugin https://github.com/cloud-gov/cf-service-connect/releases/download/v1.1.3/cf-service-connect_darwin_amd64" 
       
       # - uses: actions/checkout@v3
       # - name: Install cf-service-connect plugin
