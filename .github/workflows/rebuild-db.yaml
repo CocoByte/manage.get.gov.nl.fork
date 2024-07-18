@@ -32,14 +32,22 @@ jobs:
 
       - name: Checkout repository
         uses: actions/checkout@v2
-      - name: Install cf CLI
-        run: | 
+
+      # - name: Install cf CLI
+      #   run: | 
+      #     sudo apt-get update
+      #     sudo apt-get 
+      #     install -y wget
+      #     wget -O cf-cli.deb https://packages.cloudfoundry.org/stable?release=debian64&version=v7&source=github 
+      #     sudo dpkg -i cf-cli.deb 
+      - name: Set up Cloud Foundry CLI
+        run: |
           sudo apt-get update
-          sudo apt-get 
-          install -y wget
-          wget -O cf-cli.deb https://packages.cloudfoundry.org/stable?release=debian64&version=v7&source=github 
-          sudo dpkg -i cf-cli.deb 
-      
+          sudo apt-get install -y wget
+          wget -q -O cf-cli.tgz "https://packages.cloudfoundry.org/stable?release=linux64-binary&source=github"
+          tar -xzf cf-cli.tgz
+          sudo mv cf /usr/local/bin
+          
       - name: Install cf-service-connect plugin
         run: | 
           cf login -u ${{ secrets[env.CF_USERNAME] }} -p ${{ secrets[env.CF_PASSWORD] }} -o cisa-dotgov -s ${{ github.event.inputs.environment }} 
