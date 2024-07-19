@@ -37,31 +37,38 @@ jobs:
       #   run: | 
       #     cf login -u ${{ secrets[env.CF_USERNAME] }} -p ${{ secrets[env.CF_PASSWORD] }} -o cisa-dotgov -s ${{ github.event.inputs.environment }} 
       #     cf install-plugin https://github.com/cloud-gov/cf-service-connect/releases/download/v1.1.4/cf-service-connect_linux_amd64 -f
-      - name: Checkout repository
-        uses: actions/checkout@v2
+   
 
-      - name: Set up Cloud Foundry CLI
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y wget
-          wget -q -O cf-cli.tgz "https://packages.cloudfoundry.org/stable?release=linux64-binary&source=github"
-          tar -xzf cf-cli.tgz
-          sudo mv cf /usr/local/bin
 
-      - name: Install cf-service-connect plugin
-        run: |
-          wget -O cf-service-connect https://github.com/cloud-gov/cf-service-connect/releases/download/v1.1.3/cf-service-connect_linux_amd64
-          chmod +x cf-service-connect
-          cf install-plugin ./cf-service-connect -f
+
+      # - name: Checkout repository
+      #   uses: actions/checkout@v2
+
+      # - name: Set up Cloud Foundry CLI
+      #   run: |
+      #     sudo apt-get update
+      #     sudo apt-get install -y wget
+      #     wget -q -O cf-cli.tgz "https://packages.cloudfoundry.org/stable?release=linux64-binary&source=github"
+      #     tar -xzf cf-cli.tgz
+      #     sudo mv cf /usr/local/bin
 
       # - name: Install cf-service-connect plugin
-      #   uses: cloud-gov/cg-cli-tools@main
-      #   with:
-      #     cf_username: ${{ secrets[env.CF_USERNAME] }}
-      #     cf_password: ${{ secrets[env.CF_PASSWORD] }}
-      #     cf_org: cisa-dotgov
-      #     cf_space: ${{ github.event.inputs.environment }}
-      #     cf_command: "install-plugin https://github.com/cloud-gov/cf-service-connect/releases/download/v1.1.4/cf-service-connect_linux_amd64 -f"
+      #   run: |
+      #     wget -O cf-service-connect https://github.com/cloud-gov/cf-service-connect/releases/download/v1.1.3/cf-service-connect_linux_amd64
+      #     chmod +x cf-service-connect
+      #     cf install-plugin ./cf-service-connect -f
+
+
+
+      - name: Install cf-service-connect plugin
+        uses: cloud-gov/cg-cli-tools@main
+        with:
+          cf_username: ${{ secrets[env.CF_USERNAME] }}
+          cf_password: ${{ secrets[env.CF_PASSWORD] }}
+          cf_org: cisa-dotgov
+          cf_space: ${{ github.event.inputs.environment }}
+          cf_command: "install-plugin ./cf-service-connect -f"
+          # cf_command: "install-plugin https://github.com/cloud-gov/cf-service-connect/releases/download/v1.1.4/cf-service-connect_linux_amd64 -f"
 
       # - name: Install cf-service-connect plugin
       #   uses: cloud-gov/cg-cli-tools@main
