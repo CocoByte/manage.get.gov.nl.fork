@@ -20,35 +20,16 @@ jobs:
       CF_USERNAME: CF_${{ github.event.inputs.environment }}_USERNAME
       CF_PASSWORD: CF_${{ github.event.inputs.environment }}_PASSWORD
     steps:
-
-
-      - name: Checkout repository
-        uses: actions/checkout@v2
-
-      - name: Set up Cloud Foundry CLI
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y wget
-          wget -q -O cf-cli.tgz "https://packages.cloudfoundry.org/stable?release=linux64-binary&source=github"
-          tar -xzf cf-cli.tgz
-          sudo mv cf /usr/local/bin
-          cf login -u ${{ secrets[env.CF_USERNAME] }} -p ${{ secrets[env.CF_PASSWORD] }} -o cisa-dotgov -s ${{ github.event.inputs.environment }} 
-          cf install-plugin https://github.com/cloud-gov/cf-service-connect/releases/download/v1.1.4/cf-service-connect_linux_amd64 -f
-
       - name: Install cf-service-connect plugin
-        run: | 
-          cf login -u ${{ secrets[env.CF_USERNAME] }} -p ${{ secrets[env.CF_PASSWORD] }} -o cisa-dotgov -s ${{ github.event.inputs.environment }} 
-          cf install-plugin https://github.com/cloud-gov/cf-service-connect/releases/download/v1.1.4/cf-service-connect_linux_amd64 -f
-
-      # - name: Install cf-service-connect plugin
-      #   uses: cloud-gov/cg-cli-tools@main
-      #   with:
-      #     cf_username: ${{ secrets[env.CF_USERNAME] }}
-      #     cf_password: ${{ secrets[env.CF_PASSWORD] }}
-      #     cf_org: cisa-dotgov
-      #     cf_space: ${{ github.event.inputs.environment }}
-      #     cf_command: "connect-to-service -no-client getgov-${{ github.event.inputs.environment }} getgov-${{ github.event.inputs.environment }}-database > connection_info.txt"
-      
+        uses: cloud-gov/cg-cli-tools@main
+        with:
+          cf_username: ${{ secrets[env.CF_USERNAME] }}
+          cf_password: ${{ secrets[env.CF_PASSWORD] }}
+          cf_org: cisa-dotgov
+          cf_space: ${{ github.event.inputs.environment }}
+          cf_command: "| 
+                 login -u ${{ secrets[env.CF_USERNAME] }} -p ${{ secrets[env.CF_PASSWORD] }} -o cisa-dotgov -s ${{ github.event.inputs.environment }} 
+                 install-plugin https://github.com/cloud-gov/cf-service-connect/releases/download/v1.1.4/cf-service-connect_linux_amd64 -f"
 
       
       # # - name: Connect to service
