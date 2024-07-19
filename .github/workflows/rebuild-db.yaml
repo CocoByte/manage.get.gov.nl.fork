@@ -20,14 +20,13 @@ jobs:
       CF_USERNAME: CF_${{ github.event.inputs.environment }}_USERNAME
       CF_PASSWORD: CF_${{ github.event.inputs.environment }}_PASSWORD
     steps:
-      - name: Install cf-service-connect plugin
-        uses: cloud-gov/cg-cli-tools@main
-        with:
-          cf_command: "login -u ${{ secrets[env.CF_USERNAME] }} -p ${{ secrets[env.CF_PASSWORD] }} -o cisa-dotgov -s ${{ github.event.inputs.environment }}"
 
       - name: Install cf-service-connect plugin
-        uses: cloud-gov/cg-cli-tools@main
         with:
+          cf_username: ${{ secrets[env.CF_USERNAME] }}
+          cf_password: ${{ secrets[env.CF_PASSWORD] }}
+          cf_org: cisa-dotgov
+          cf_space: ${{ github.event.inputs.environment }}
           cf_command: "install-plugin https://github.com/cloud-gov/cf-service-connect/releases/download/v1.1.4/cf-service-connect_linux_amd64 -f"
       
       # # - name: Connect to service
