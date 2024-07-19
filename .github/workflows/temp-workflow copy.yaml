@@ -1,0 +1,89 @@
+# # This workflow can be run from the CLI
+# #     gh workflow run rebuild-db.yaml -f environment=ENVIRONMENT
+
+# name: Rebuild database
+# run-name: Rebuild database for ${{ github.event.inputs.environment }}
+
+# on:
+#   workflow_dispatch:
+#     inputs:
+#       environment:
+#         type: choice
+#         description: Which environment should we flush and re-load data for?
+#         options:
+#           - nl
+
+# jobs:
+#   reset-db:
+#     runs-on: ubuntu-latest
+#     env:
+#       CF_USERNAME: CF_${{ github.event.inputs.environment }}_USERNAME
+#       CF_PASSWORD: CF_${{ github.event.inputs.environment }}_PASSWORD
+#     steps:
+#       - name: Get environment variables
+#         uses: cloud-gov/cg-cli-tools@main
+#         with:
+#           cf_username: ${{ secrets[env.CF_USERNAME] }}
+#           cf_password: ${{ secrets[env.CF_PASSWORD] }}
+#           cf_org: cisa-dotgov
+#           cf_space: ${{ github.event.inputs.environment }}
+#           cf_command: "env getgov-${{ github.event.inputs.environment }} > env_output.txt"
+
+
+#       - name: Extract connection details
+#         run: |
+#           VCAP_SERVICES=$(cat env_output.txt)
+#           port=$(echo "$VCAP_SERVICES" | sed -n 's/.*"port": *"\([^"]*\)".*/\1/p')
+#           username=$(echo "$VCAP_SERVICES" | sed -n 's/.*"username": *"\([^"]*\)".*/\1/p')
+#           password=$(echo "$VCAP_SERVICES" | sed -n 's/.*"password": *"\([^"]*\)".*/\1/p')
+#           dbname=$(echo "$VCAP_SERVICES" | sed -n 's/.*"db_name": *"\([^"]*\)".*/\1/p')
+#           host=$(echo "$VCAP_SERVICES" | sed -n 's/.*"host": *"\([^"]*\)".*/\1/p')
+#           echo "===== Exporting to local env ===="
+#           echo "port=$port" >> $GITHUB_ENV
+#           echo "username=$username" >> $GITHUB_ENV
+#           echo "password=$password" >> $GITHUB_ENV
+#           echo "dbname=$dbname" >> $GITHUB_ENV
+#           echo "host=$host" >> $GITHUB_ENV
+#           echo $GITHUB_ENV 
+
+#       - name: Connect to PostgreSQL
+#         run: |
+#           psql -h localhost -p ${{ env.port }} -U ${{ env.username }} -d ${{ env.dbname }}
+#         env:
+#           PGPASSWORD: ${{ secrets.PG_PASSWORD }}
+
+#       - name: Get table names
+#         id: get_tables
+#         run: |
+#           tables= "\dt" -t | awk '{print $3}')
+#           echo "::set-output name=tables::$tables"
+
+#       # - name: Drop all tables
+#       #   run: |
+#       #     for table in ${{ steps.get_tables.outputs.tables }}
+#       #     do
+#       #       psql -h localhost -p ${{ steps.extract.outputs.port }} -U ${{ steps.extract.outputs.username }} -d ${{ steps.extract.outputs.broker_name }} -c "DROP TABLE IF EXISTS $table CASCADE;"
+#       #     done
+#       #   env:
+#       #     PGPASSWORD: ${{ secrets.PG_PASSWORD }}
+      
+#       # # - name: Migrate
+#       # #   run: |
+#       # #     cf ssh getgov-${{ github.event.inputs.environment }} -c "/tmp/lifecycle/shell ./manage.py migrate"
+#       - name: Run Django migrations for ${{ github.event.inputs.environment }}
+#         uses: cloud-gov/cg-cli-tools@main
+#         with:
+#           cf_username: ${{ secrets[env.CF_USERNAME] }}
+#           cf_password: ${{ secrets[env.CF_PASSWORD] }}
+#           cf_org: cisa-dotgov
+#           cf_space: ${{ github.event.inputs.environment }}
+#           cf_command: "run-task getgov-${{ github.event.inputs.environment }} --command 'python manage.py migrate' --name migrate"
+
+#       # # - name: Run fixtures
+#       # #   run: |
+#       # #     cf ssh getgov-${{ github.event.inputs.environment }} -c "/tmp/lifecycle/shell ./manage.py load"
+      
+
+#       # # - name: Create cache table
+#       # #   run: |
+#       # #     cf ssh getgov-${{ github.event.inputs.environment }} -c "/tmp/lifecycle/shell ./manage.py createcachetable"

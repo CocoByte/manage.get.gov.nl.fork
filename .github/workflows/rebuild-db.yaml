@@ -20,43 +20,70 @@ jobs:
       CF_USERNAME: CF_${{ github.event.inputs.environment }}_USERNAME
       CF_PASSWORD: CF_${{ github.event.inputs.environment }}_PASSWORD
     steps:
-      - name: Get environment variables
-        uses: cloud-gov/cg-cli-tools@main
-        with:
-          cf_username: ${{ secrets[env.CF_USERNAME] }}
-          cf_password: ${{ secrets[env.CF_PASSWORD] }}
-          cf_org: cisa-dotgov
-          cf_space: ${{ github.event.inputs.environment }}
-          cf_command: "env getgov-${{ github.event.inputs.environment }} > env_output.txt"
 
 
-      - name: Extract connection details
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Set up Cloud Foundry CLI
         run: |
-          VCAP_SERVICES=$(cat env_output.txt)
-          port=$(echo "$VCAP_SERVICES" | sed -n 's/.*"port": *"\([^"]*\)".*/\1/p')
-          username=$(echo "$VCAP_SERVICES" | sed -n 's/.*"username": *"\([^"]*\)".*/\1/p')
-          password=$(echo "$VCAP_SERVICES" | sed -n 's/.*"password": *"\([^"]*\)".*/\1/p')
-          dbname=$(echo "$VCAP_SERVICES" | sed -n 's/.*"db_name": *"\([^"]*\)".*/\1/p')
-          host=$(echo "$VCAP_SERVICES" | sed -n 's/.*"host": *"\([^"]*\)".*/\1/p')
-          echo "===== Exporting to local env ===="
-          echo "port=$port" >> $GITHUB_ENV
-          echo "username=$username" >> $GITHUB_ENV
-          echo "password=$password" >> $GITHUB_ENV
-          echo "dbname=$dbname" >> $GITHUB_ENV
-          echo "host=$host" >> $GITHUB_ENV
-          echo $GITHUB_ENV 
+          sudo apt-get update
+          sudo apt-get install -y wget
+          wget -q -O cf-cli.tgz "https://packages.cloudfoundry.org/stable?release=linux64-binary&source=github"
+          tar -xzf cf-cli.tgz
+          sudo mv cf /usr/local/bin
 
-      - name: Connect to PostgreSQL
-        run: |
-          psql -h localhost -p ${{ env.port }} -U ${{ env.username }} -d ${{ env.dbname }}
-        env:
-          PGPASSWORD: ${{ secrets.PG_PASSWORD }}
+      - name: Install cf-service-connect plugin
+        run: | 
+          cf login -u ${{ secrets[env.CF_USERNAME] }} -p ${{ secrets[env.CF_PASSWORD] }} -o cisa-dotgov -s ${{ github.event.inputs.environment }} 
+          cf install-plugin https://github.com/cloud-gov/cf-service-connect/releases/download/v1.1.4/cf-service-connect_linux_amd64 -f
 
-      - name: Get table names
-        id: get_tables
-        run: |
-          tables= "\dt" -t | awk '{print $3}')
-          echo "::set-output name=tables::$tables"
+      # - name: Install cf-service-connect plugin
+      #   uses: cloud-gov/cg-cli-tools@main
+      #   with:
+      #     cf_username: ${{ secrets[env.CF_USERNAME] }}
+      #     cf_password: ${{ secrets[env.CF_PASSWORD] }}
+      #     cf_org: cisa-dotgov
+      #     cf_space: ${{ github.event.inputs.environment }}
+      #     cf_command: "connect-to-service -no-client getgov-${{ github.event.inputs.environment }} getgov-${{ github.event.inputs.environment }}-database > connection_info.txt"
+      
+
+      
+      # # - name: Connect to service
+      # #   id: connect
+      # #   run: |
+      # #     cf connect-to-service -no-client getgov-${{ github.event.inputs.environment }} getgov-${{ github.event.inputs.environment }}-database > connection_info.txt
+      
+      # - name: Connect to service
+      #   with:
+      #     cf_username: ${{ secrets[env.CF_USERNAME] }}
+      #     cf_password: ${{ secrets[env.CF_PASSWORD] }}
+      #     cf_org: cisa-dotgov
+      #     cf_space: ${{ github.event.inputs.environment }}
+      #     cf_command: "connect-to-service -no-client getgov-${{ github.event.inputs.environment }} getgov-${{ github.event.inputs.environment }}-database > connection_info.txt
+      #     cat connection_info.txt" 
+
+      # - name: Extract connection details
+      #   id: extract
+      #   run: |
+      #     port=$(grep -oP 'port:\s*\K\d+' connection_info.txt)
+      #     username=$(grep -oP 'user:\s*\K\w+' connection_info.txt)
+      #     broker_name=$(grep -oP 'dbname:\s*\K\w+' connection_info.txt)
+      #     echo "::set-output name=port::$port"
+      #     echo "::set-output name=username::$username"
+      #     echo "::set-output name=broker_name::$broker_name"
+
+      # - name: Connect to PostgreSQL
+      #   run: |
+      #     psql -h localhost -p ${{ steps.extract.outputs.port }} -U ${{ steps.extract.outputs.username }} -d ${{ steps.extract.outputs.broker_name }}
+      #   env:
+      #     PGPASSWORD: ${{ secrets.PG_PASSWORD }}
+
+      # - name: Get table names
+      #   id: get_tables
+      #   run: |
+      #     tables=$(psql -h localhost -p ${{ steps.extract.outputs.port }} -U ${{ steps.extract.outputs.username }} -d ${{ steps.extract.outputs.broker_name }} -c "\dt" -t | awk '{print $3}')
+      #     echo "::set-output name=tables::$tables"
 
       # - name: Drop all tables
       #   run: |
@@ -82,7 +109,6 @@ jobs:
       # # - name: Run fixtures
       # #   run: |
       # #     cf ssh getgov-${{ github.event.inputs.environment }} -c "/tmp/lifecycle/shell ./manage.py load"
-      
 
       # # - name: Create cache table
       # #   run: |
