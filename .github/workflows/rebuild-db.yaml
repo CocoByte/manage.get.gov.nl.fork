@@ -38,32 +38,35 @@ jobs:
           password=$(echo "$VCAP_SERVICES" | sed -n 's/.*"password": *"\([^"]*\)".*/\1/p')
           dbname=$(echo "$VCAP_SERVICES" | sed -n 's/.*"db_name": *"\([^"]*\)".*/\1/p')
           host=$(echo "$VCAP_SERVICES" | sed -n 's/.*"host": *"\([^"]*\)".*/\1/p')
+          echo "===== MASKING SENSITIVE DATA ===="
           echo "::add-mask::$port"
           echo "::add-mask::$username"
           echo "::add-mask::$password"
           echo "::add-mask::$dbname"
           echo "::add-mask::$host"
-          echo "port=$port" >> $GITHUB_ENV
-          echo "username=$username" >> $GITHUB_ENV
-          echo "password=$password" >> $GITHUB_ENV
-          echo "dbname=$dbname" >> $GITHUB_ENV
-          echo "host=$host" >> $GITHUB_ENV
           echo "port=$port" 
           echo "username=$username"
           echo "password=$password"
           echo "dbname=$dbname" 
           echo "host=$host" 
+          echo "===== Exporting to local env ===="
+          echo "port=$port" >> $GITHUB_ENV
+          echo "username=$username" >> $GITHUB_ENV
+          echo "password=$password" >> $GITHUB_ENV
+          echo "dbname=$dbname" >> $GITHUB_ENV
+          echo "host=$host" >> $GITHUB_ENV
+          echo $GITHUB_ENV 
 
       - name: Connect to PostgreSQL
         run: |
-          psql -h localhost -p ${{ steps.extract.outputs.port }} -U ${{ steps.extract.outputs.username }} -d ${{ steps.extract.outputs.broker_name }}
+          psql -h localhost -p ${{ env.port }} -U ${{ env.username }} -d ${{ env.dbname }}
         env:
           PGPASSWORD: ${{ secrets.PG_PASSWORD }}
 
       - name: Get table names
         id: get_tables
         run: |
-          tables=$(psql -h localhost -p ${{ steps.extract.outputs.port }} -U ${{ steps.extract.outputs.username }} -d ${{ steps.extract.outputs.broker_name }} -c "\dt" -t | awk '{print $3}')
+          tables= "\dt" -t | awk '{print $3}')
           echo "::set-output name=tables::$tables"
 
       # - name: Drop all tables
