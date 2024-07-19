@@ -32,18 +32,27 @@ jobs:
 
       - name: Extract connection details
         run: |
-          echo "=====STARTING====="
           VCAP_SERVICES=$(cat env_output.txt)
           port=$(echo "$VCAP_SERVICES" | sed -n 's/.*"port": *"\([^"]*\)".*/\1/p')
           username=$(echo "$VCAP_SERVICES" | sed -n 's/.*"username": *"\([^"]*\)".*/\1/p')
           password=$(echo "$VCAP_SERVICES" | sed -n 's/.*"password": *"\([^"]*\)".*/\1/p')
           dbname=$(echo "$VCAP_SERVICES" | sed -n 's/.*"db_name": *"\([^"]*\)".*/\1/p')
           host=$(echo "$VCAP_SERVICES" | sed -n 's/.*"host": *"\([^"]*\)".*/\1/p')
+          echo "::add-mask::$port"
+          echo "::add-mask::$username"
+          echo "::add-mask::$password"
+          echo "::add-mask::$dbname"
+          echo "::add-mask::$host"
           echo "port=$port" >> $GITHUB_ENV
           echo "username=$username" >> $GITHUB_ENV
           echo "password=$password" >> $GITHUB_ENV
           echo "dbname=$dbname" >> $GITHUB_ENV
           echo "host=$host" >> $GITHUB_ENV
+          echo "port=$port" 
+          echo "username=$username"
+          echo "password=$password"
+          echo "dbname=$dbname" 
+          echo "host=$host" 
 
       - name: Connect to PostgreSQL
         run: |
