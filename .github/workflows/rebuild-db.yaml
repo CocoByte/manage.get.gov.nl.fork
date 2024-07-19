@@ -37,18 +37,9 @@ jobs:
           cf_password: ${{ secrets[env.CF_PASSWORD] }}
           cf_org: cisa-dotgov
           cf_space: ${{ github.event.inputs.environment }}
-          command: |
-              VCAP_SERVICES=$(cat env_output.txt)
-              port=$(echo "$VCAP_SERVICES" | sed -n 's/.*"port": *"\([^"]*\)".*/\1/p')
-              username=$(echo "$VCAP_SERVICES" | sed -n 's/.*"username": *"\([^"]*\)".*/\1/p')
-              password=$(echo "$VCAP_SERVICES" | sed -n 's/.*"password": *"\([^"]*\)".*/\1/p')
-              dbname=$(echo "$VCAP_SERVICES" | sed -n 's/.*"db_name": *"\([^"]*\)".*/\1/p')
-              host=$(echo "$VCAP_SERVICES" | sed -n 's/.*"host": *"\([^"]*\)".*/\1/p')
-              echo "port=$port" >> $GITHUB_ENV
-              echo "username=$username" >> $GITHUB_ENV
-              echo "password=$password" >> $GITHUB_ENV
-              echo "dbname=$dbname" >> $GITHUB_ENV
-              echo "host=$host" >> $GITHUB_ENV
+          run: |
+              echo "hey"
+              echo "you"
 
       - name: Connect to PostgreSQL
         run: |
