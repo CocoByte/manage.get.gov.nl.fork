@@ -38,16 +38,8 @@ jobs:
           cf_org: cisa-dotgov
           cf_space: ${{ github.event.inputs.environment }}
           command: |
-            port=$(grep -oP '(?<="port": ")[^"]*' env_output.txt)
-            username=$(grep -oP '(?<="username": ")[^"]*' env_output.txt)
-            password=$(grep -oP '(?<="password": ")[^"]*' env_output.txt)
-            dbname=$(grep -oP '(?<="name": ")[^"]*' env_output.txt)
-            host=$(grep -oP '(?<="hostname": ")[^"]*' env_output.txt)
-            echo "port=$port" >> $GITHUB_ENV
-            echo "username=$username" >> $GITHUB_ENV
-            echo "password=$password" >> $GITHUB_ENV
-            echo "dbname=$dbname" >> $GITHUB_ENV
-            echo "host=$host" >> $GITHUB_ENV
+            echo "hey"
+            echo "you"
 
       - name: Connect to PostgreSQL
         run: |
