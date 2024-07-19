@@ -1,86 +1,147 @@
-name: Manual Build and Deploy
-run-name: Manually build and deploy branch to sandbox of choice
+# # This workflow can be run from the CLI
+# #     gh workflow run rebuild-db.yaml -f environment=ENVIRONMENT
 
-on:
-  workflow_dispatch:
-    inputs:
-      environment:
-        description: 'Environment to deploy'
-        required: true
-        default: 'backup'
-        type: 'choice'
-        options:
-          - ab
-          - backup
-          - cb
-          - dk
-          - es
-          - gd
-          - ko
-          - ky
-          - nl
-          - rb
-          - rh
-          - rjm
-          - meoward
-          - bob
-          - hotgov
-          - litterbox
-      # GitHub Actions has no "good" way yet to dynamically input branches
-      branch:
-        description: 'Branch to deploy'
-        required: true
-        default: 'main'
-        type: string
+# name: Rebuild database
+# run-name: Rebuild database for ${{ github.event.inputs.environment }}
+
+# on:
+#   workflow_dispatch:
+#     inputs:
+#       environment:
+#         type: choice
+#         description: Which environment should we flush and re-load data for?
+#         options:
+#           - nl
+
+# jobs:
+#   reset-db:
+#     runs-on: ubuntu-latest
+#     env:
+#       CF_USERNAME: CF_${{ github.event.inputs.environment }}_USERNAME
+#       CF_PASSWORD: CF_${{ github.event.inputs.environment }}_PASSWORD
+#     steps:
+
+
+#       # - name: Checkout repository
+#       #   uses: actions/checkout@v2
+
+#       # - name: Set up Cloud Foundry CLI
+#       #   run: |
+#       #     sudo apt-get update
+#       #     sudo apt-get install -y wget
+#       #     wget -q -O cf-cli.tgz "https://packages.cloudfoundry.org/stable?release=linux64-binary&source=github"
+#       #     tar -xzf cf-cli.tgz
+#       #     sudo mv cf /usr/local/bin
+
+#       # - name: Install cf-service-connect plugin
+#       #   run: | 
+#       #     cf login -u ${{ secrets[env.CF_USERNAME] }} -p ${{ secrets[env.CF_PASSWORD] }} -o cisa-dotgov -s ${{ github.event.inputs.environment }} 
+#       #     cf install-plugin https://github.com/cloud-gov/cf-service-connect/releases/download/v1.1.4/cf-service-connect_linux_amd64 -f
+   
+
+
+
+#       # - name: Checkout repository
+#       #   uses: actions/checkout@v2
+
+#       # - name: Set up Cloud Foundry CLI
+#       #   run: |
+#       #     sudo apt-get update
+#       #     sudo apt-get install -y wget
+#       #     wget -q -O cf-cli.tgz "https://packages.cloudfoundry.org/stable?release=linux64-binary&source=github"
+#       #     tar -xzf cf-cli.tgz
+#       #     sudo mv cf /usr/local/bin
+
+#       # - name: Install cf-service-connect plugin
+#       #   run: |
+#       #     wget -O cf-service-connect https://github.com/cloud-gov/cf-service-connect/releases/download/v1.1.3/cf-service-connect_linux_amd64
+#       #     chmod +x cf-service-connect
+#       #     cf install-plugin ./cf-service-connect -f
+
+
+
+#       - name: Install cf-service-connect plugin
+#         uses: cloud-gov/cg-cli-tools@main
+#         with:
+#           cf_username: ${{ secrets[env.CF_USERNAME] }}
+#           cf_password: ${{ secrets[env.CF_PASSWORD] }}
+#           cf_org: cisa-dotgov
+#           cf_space: ${{ github.event.inputs.environment }}
+#           # cf_command: "install-plugin ./cf-service-connect -f"
+#           cf_command: "install-plugin https://github.com/cloud-gov/cf-service-connect/releases/download/v1.1.4/cf-service-connect_linux_amd64 -f"
+
+#       # - name: Install cf-service-connect plugin
+#       #   uses: cloud-gov/cg-cli-tools@main
+#       #   with:
+#       #     cf_username: ${{ secrets[env.CF_USERNAME] }}
+#       #     cf_password: ${{ secrets[env.CF_PASSWORD] }}
+#       #     cf_org: cisa-dotgov
+#       #     cf_space: ${{ github.event.inputs.environment }}
+#       #     cf_command: "connect-to-service -no-client getgov-${{ github.event.inputs.environment }} getgov-${{ github.event.inputs.environment }}-database > connection_info.txt"
       
 
-jobs:
-  variables:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Setting global variables
-        uses: actions/github-script@v6
-        id: var
-        with:
-          script: |
-            core.setOutput('environment', '${{ github.head_ref }}'.split("/")[0]);
-  deploy:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-      - name: Compile USWDS assets
-        working-directory: ./src
-        run: |
-          docker compose run node npm install &&
-          docker compose run node npx gulp copyAssets &&
-          docker compose run node npx gulp compile
-      - name: Collect static assets 
-        working-directory: ./src
-        run: docker compose run app python manage.py collectstatic --no-input
-      - name: Deploy to cloud.gov sandbox
-        uses: cloud-gov/cg-cli-tools@main
-        env:
-          ENVIRONMENT: ${{ github.event.inputs.environment }}
-          CF_USERNAME: CF_${{ github.event.inputs.environment }}_USERNAME
-          CF_PASSWORD: CF_${{ github.event.inputs.environment }}_PASSWORD
-        with:
-          cf_username: ${{ secrets[env.CF_USERNAME] }}
-          cf_password: ${{ secrets[env.CF_PASSWORD] }}
-          cf_org: cisa-dotgov
-          cf_space: ${{ env.ENVIRONMENT }}
-          cf_manifest: ops/manifests/manifest-${{ env.ENVIRONMENT }}.yaml
-  comment:
-    runs-on: ubuntu-latest
-    needs: [deploy]
-    steps:
-      - uses: actions/github-script@v6
-        env:
-          ENVIRONMENT: ${{ github.event.inputs.environment }}
-        with:
-          github-token: ${{secrets.GITHUB_TOKEN}}
-          script: |
-            github.rest.issues.createComment({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              body: '🥳 Successfully deployed to developer sandbox **[${{ env.ENVIRONMENT }}](https://getgov-${{ env.ENVIRONMENT }}.app.cloud.gov/)**.'
-            })
+      
+#       # # - name: Connect to service
+#       # #   id: connect
+#       # #   run: |
+#       # #     cf connect-to-service -no-client getgov-${{ github.event.inputs.environment }} getgov-${{ github.event.inputs.environment }}-database > connection_info.txt
+      
+#       # - name: Connect to service
+#       #   with:
+#       #     cf_username: ${{ secrets[env.CF_USERNAME] }}
+#       #     cf_password: ${{ secrets[env.CF_PASSWORD] }}
+#       #     cf_org: cisa-dotgov
+#       #     cf_space: ${{ github.event.inputs.environment }}
+#       #     cf_command: "connect-to-service -no-client getgov-${{ github.event.inputs.environment }} getgov-${{ github.event.inputs.environment }}-database > connection_info.txt
+#       #     cat connection_info.txt" 
+
+#       # - name: Extract connection details
+#       #   id: extract
+#       #   run: |
+#       #     port=$(grep -oP 'port:\s*\K\d+' connection_info.txt)
+#       #     username=$(grep -oP 'user:\s*\K\w+' connection_info.txt)
+#       #     broker_name=$(grep -oP 'dbname:\s*\K\w+' connection_info.txt)
+#       #     echo "::set-output name=port::$port"
+#       #     echo "::set-output name=username::$username"
+#       #     echo "::set-output name=broker_name::$broker_name"
+
+#       # - name: Connect to PostgreSQL
+#       #   run: |
+#       #     psql -h localhost -p ${{ steps.extract.outputs.port }} -U ${{ steps.extract.outputs.username }} -d ${{ steps.extract.outputs.broker_name }}
+#       #   env:
+#       #     PGPASSWORD: ${{ secrets.PG_PASSWORD }}
+
+#       # - name: Get table names
+#       #   id: get_tables
+#       #   run: |
+#       #     tables=$(psql -h localhost -p ${{ steps.extract.outputs.port }} -U ${{ steps.extract.outputs.username }} -d ${{ steps.extract.outputs.broker_name }} -c "\dt" -t | awk '{print $3}')
+#       #     echo "::set-output name=tables::$tables"
+
+#       # - name: Drop all tables
+#       #   run: |
+#       #     for table in ${{ steps.get_tables.outputs.tables }}
+#       #     do
+#       #       psql -h localhost -p ${{ steps.extract.outputs.port }} -U ${{ steps.extract.outputs.username }} -d ${{ steps.extract.outputs.broker_name }} -c "DROP TABLE IF EXISTS $table CASCADE;"
+#       #     done
+#       #   env:
+#       #     PGPASSWORD: ${{ secrets.PG_PASSWORD }}
+      
+#       # # - name: Migrate
+#       # #   run: |
+#       # #     cf ssh getgov-${{ github.event.inputs.environment }} -c "/tmp/lifecycle/shell ./manage.py migrate"
+#       - name: Run Django migrations for ${{ github.event.inputs.environment }}
+#         uses: cloud-gov/cg-cli-tools@main
+#         with:
+#           cf_username: ${{ secrets[env.CF_USERNAME] }}
+#           cf_password: ${{ secrets[env.CF_PASSWORD] }}
+#           cf_org: cisa-dotgov
+#           cf_space: ${{ github.event.inputs.environment }}
+#           cf_command: "run-task getgov-${{ github.event.inputs.environment }} --command 'python manage.py migrate' --name migrate"
+
+#       # # - name: Run fixtures
+#       # #   run: |
+#       # #     cf ssh getgov-${{ github.event.inputs.environment }} -c "/tmp/lifecycle/shell ./manage.py load"
+
+#       # # - name: Create cache table
+#       # #   run: |
+#       # #     cf ssh getgov-${{ github.event.inputs.environment }} -c "/tmp/lifecycle/shell ./manage.py createcachetable"
