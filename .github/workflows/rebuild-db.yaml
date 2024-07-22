@@ -11,7 +11,24 @@ on:
         type: choice
         description: Which environment should we flush and re-load data for?
         options:
+          - ag
+          - litterbox
+          - hotgov
+          - cb
+          - bob
+          - meoward
+          - backup
+          - ky
+          - es
           - nl
+          - rh
+          - za
+          - gd
+          - rb
+          - ko
+          - ab
+          - rjm
+          - dk
 
 jobs:
   reset-db:
