@@ -27,7 +27,7 @@ jobs:
           cf_password: ${{ secrets[env.CF_PASSWORD] }}
           cf_org: cisa-dotgov
           cf_space: ${{ github.event.inputs.environment }}
-          cf_command: "run-task getgov-${{ github.event.inputs.environment }} --command 'python manage.py drop_tables --no-input' --name flush"
+          cf_command: "run-task getgov-${{ github.event.inputs.environment }} --command 'python manage.py drop_tables' --name drop_tables"
       
       - name: Run Django migrations for ${{ github.event.inputs.environment }}
         uses: cloud-gov/cg-cli-tools@main
@@ -36,18 +36,56 @@ jobs:
           cf_password: ${{ secrets[env.CF_PASSWORD] }}
           cf_org: cisa-dotgov
           cf_space: ${{ github.event.inputs.environment }}
-          cf_command: "run-task getgov-${{ github.event.inputs.environment }} --command 'python manage.py migrate' --name migrate"
+          cf_command: "run-task getgov-${{ github.event.inputs.environment }} --command 'python manage.py drop_tables --no-input' --name flush"
+      # # - name: Connect to service
+      # #   id: connect
+      # #   run: |
+      # #     cf connect-to-service -no-client getgov-${{ github.event.inputs.environment }} getgov-${{ github.event.inputs.environment }}-database > connection_info.txt
+      
+      # - name: Connect to service
+      #   with:
+      #     cf_username: ${{ secrets[env.CF_USERNAME] }}
+      #     cf_password: ${{ secrets[env.CF_PASSWORD] }}
+      #     cf_org: cisa-dotgov
+      #     cf_space: ${{ github.event.inputs.environment }}
+      #     cf_command: "connect-to-service -no-client getgov-${{ github.event.inputs.environment }} getgov-${{ github.event.inputs.environment }}-database > connection_info.txt
+      #     cat connection_info.txt" 
 
-      - name: Run fixtures for ${{ github.event.inputs.environment }}
-        uses: cloud-gov/cg-cli-tools@main
-        with:
-          cf_username: ${{ secrets[env.CF_USERNAME] }}
-          cf_password: ${{ secrets[env.CF_PASSWORD] }}
-          cf_org: cisa-dotgov
-          cf_space: ${{ github.event.inputs.environment }}
-          cf_command: "run-task getgov-${{ github.event.inputs.environment }} --command 'python manage.py load' --name load"
+      # - name: Extract connection details
+      #   id: extract
+      #   run: |
+      #     port=$(grep -oP 'port:\s*\K\d+' connection_info.txt)
+      #     username=$(grep -oP 'user:\s*\K\w+' connection_info.txt)
+      #     broker_name=$(grep -oP 'dbname:\s*\K\w+' connection_info.txt)
+      #     echo "::set-output name=port::$port"
+      #     echo "::set-output name=username::$username"
+      #     echo "::set-output name=broker_name::$broker_name"
 
-      - name: Create cache table for ${{ github.event.inputs.environment }}
+      # - name: Connect to PostgreSQL
+      #   run: |
+      #     psql -h localhost -p ${{ steps.extract.outputs.port }} -U ${{ steps.extract.outputs.username }} -d ${{ steps.extract.outputs.broker_name }}
+      #   env:
+      #     PGPASSWORD: ${{ secrets.PG_PASSWORD }}
+
+      # - name: Get table names
+      #   id: get_tables
+      #   run: |
+      #     tables=$(psql -h localhost -p ${{ steps.extract.outputs.port }} -U ${{ steps.extract.outputs.username }} -d ${{ steps.extract.outputs.broker_name }} -c "\dt" -t | awk '{print $3}')
+      #     echo "::set-output name=tables::$tables"
+
+      # - name: Drop all tables
+      #   run: |
+      #     for table in ${{ steps.get_tables.outputs.tables }}
+      #     do
+      #       psql -h localhost -p ${{ steps.extract.outputs.port }} -U ${{ steps.extract.outputs.username }} -d ${{ steps.extract.outputs.broker_name }} -c "DROP TABLE IF EXISTS $table CASCADE;"
+      #     done
+      #   env:
+      #     PGPASSWORD: ${{ secrets.PG_PASSWORD }}
+      
+      # # - name: Migrate
+      # #   run: |
+      # #     cf ssh getgov-${{ github.event.inputs.environment }} -c "/tmp/lifecycle/shell ./manage.py migrate"
+      - name: Run Django migrations for ${{ github.event.inputs.environment }}
         uses: cloud-gov/cg-cli-tools@main
         with:
           cf_username: ${{ secrets[env.CF_USERNAME] }}
